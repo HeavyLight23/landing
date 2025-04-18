@@ -26,7 +26,7 @@ function showStartScreen() {
 
 
 
-
+let font;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.5, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -165,7 +165,7 @@ const damping = 0.98; // Коэффициент затухания
 const rollDamping = 0.95; // Коэффициент затухания для крена
 const rollForce = 0.02; // Сила поворота
 let isMouseDown = false;
-let horizontalStick, verticalStick;
+//let horizontalStick, verticalStick;
 const stickDistance = 5; // Максимальное расстояние стика от центра
 const maxSpeed = 0.05; // Максимальная скорость для моделирования
 
@@ -214,17 +214,20 @@ window.addEventListener('keyup', (event) => {
 
 let panelGroup = new THREE.Group();
 
-let panelBase = new THREE.Mesh(
+let panelBase = new THREE.Mesh/*(
     new THREE.BoxGeometry(10, 0.1, 1.5),
     new THREE.MeshLambertMaterial({ color: 'grey' }));
-    panelGroup.add(panelBase);
+    panelGroup.add(panelBase);*/
 
-/*loader.load('models/PanelBase.glb', function(gltf2){
+loader.load('models/PanelBase.glb', function(gltf2){
 panelBase=gltf2.scene;
+panelBase.scale.set(2.35, 2.35, 2.35);
+panelBase.rotation.x = 1;
+panelBase.rotation.z = -3.14;
 panelGroup.add(panelBase);
     }, undefined, function(error) {
     consolex.error(error);
-        });*/
+        });
 
 /*loader.load('models/scene.glb', function(gltf) {
 	//landerr=gltf.scene;
@@ -257,8 +260,12 @@ panelBase.position.copy(camera.position);
 
 
 // Индикатор вертикального положения
-const createVerticalIndicator = () => {
+/*const createVerticalIndicator = () => {
     const baseGeometry = new THREE.BoxGeometry(0.5, 0.9, 0.05);
+
+    
+
+
     const baseMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         metalness: 0,
@@ -291,13 +298,13 @@ const createVerticalIndicator = () => {
     base.translateY(-1);
     
     return { base, stick };
-};
+};*/
 
-const verticalIndicator = createVerticalIndicator();
+//const verticalIndicator = createVerticalIndicator();
 
 // Индикатор крена
 
-panelGroup.add(verticalIndicator.base);
+//panelGroup.add(verticalIndicator.base);
 panelGroup.add(rollIndic);
 
 rollIndic.translateX(-1.2);
@@ -326,6 +333,51 @@ const updateCamera = () => {
 
     
 };
+
+// Удалите старый код создания основы
+// const baseGeometry = new THREE.BoxGeometry(...);
+// const base = new THREE.Mesh(...);
+
+// Добавьте в начало основного кода
+let vertBase = new THREE.Mesh;
+let vertStick = new THREE.Mesh;
+
+// Добавьте загрузку 3D-модели основы
+loader.load('models/vertBase.glb', (gltf) => {
+    vertBase = gltf.scene;
+    vertBase.scale.set(2.85, 2.85, 2.85); // Настройте масштаб
+    vertBase.rotation.set(0, 0, 0); // Сохраните исходный поворот
+    panelGroup.add(vertBase);
+    
+    // Позиционирование как у старой базы
+    vertBase.position.copy(camera.position);
+    vertBase.translateZ(-3);
+    vertBase.translateX(3);
+    vertBase.translateY(-1);
+  });
+
+  // Удалите старый код создания стика
+// const stickGeometry = new THREE.BoxGeometry(...);
+// const stick = new THREE.Mesh(...);
+
+// Добавьте загрузку 3D-модели стика
+loader.load('models/vertDyn.glb', (gltf) => {
+    vertStick = gltf.scene;
+    vertStick.scale.set(2.35, 2.35, 2.35); // Настройте масштаб
+    vertStick.rotation.set(0, 0, 0);
+    //vertStick.position.set(0, 0, 0); // Начальная позиция
+  
+    // Сохраняем ссылку для анимации
+    //verticalIndicator.stick = vertStick;
+    
+    // Добавьте в ту же позицию, что и старый стик
+    panelGroup.add(vertStick); // Предполагая, что основа называется 'base'
+    //vertStick.rotation.set(1, 0, 0);
+    vertBase.position.copy(camera.position);
+    vertBase.translateZ(-3);
+    vertBase.translateX(3);
+    vertBase.translateY(-1);
+  });
 
 
 //-------------------------------------------------ИНДИКАТОР--ТОПЛИВА------------------------------------------------------------------------------
@@ -365,7 +417,7 @@ panelGroup.add(fuelIndicator.group);
 
 //---------------------------------------таймер------------------------------------------------
 
-/*let timerGroup = new THREE.Group();
+let timerGroup = new THREE.Group();
 panelGroup.add(timerGroup);
 
 function createTimer() {
@@ -373,7 +425,7 @@ function createTimer() {
     
     // Фон
     const background = new THREE.Mesh(
-        new THREE.PlaneGeometry(6, 1.5),
+        new THREE.BoxGeometry(6, 6, 6),
         new THREE.MeshBasicMaterial({ color: 0x1a1a1a })
     );
     timerGroup.add(background); // Теперь используем глобальную группу
@@ -382,9 +434,9 @@ function createTimer() {
     const textMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
     
     // Минуты
-    const minutesGeometry = new TextGeometry("40", {
+    const minutesGeometry = new TextGeometry("50", {
         font: font,
-        size: 0.4,
+        size: 0.2,
         height: 0.1
     });
     const minutesText = new THREE.Mesh(minutesGeometry, textMaterial);
@@ -394,7 +446,7 @@ function createTimer() {
     // Секунды
     const secondsGeometry = new TextGeometry("00", {
         font: font,
-        size: 0.4,
+        size: 0.2,
         height: 0.1
     });
     const secondsText = new THREE.Mesh(secondsGeometry, textMaterial);
@@ -404,21 +456,22 @@ function createTimer() {
     // Двоеточие
     const separatorGeometry = new TextGeometry(":", {
         font: font,
-        size: 0.4,
+        size: 0.2,
         height: 0.1
     });
     const separator = new THREE.Mesh(separatorGeometry, textMaterial);
     separator.position.set(0, 0, 0.1);
     timerGroup.add(separator);
 
-    timerGroup.position.set(-3, 3, -5);
+    timerGroup.position.set(0, 1.0, -0.4);
+    timerGroup.rotation.set(1, 0, 0);
 }
 const fontLoader = new FontLoader();
 fontLoader.load(
-    require('../src/Furore_Regular.json'), (loadedFont) => {
+    require('./Furore_Regular.json'), (loadedFont) => {
     font = loadedFont;
     createTimer();
-});*/
+});
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -440,13 +493,44 @@ function createStick(color, x, z) {
 }
 
 
-horizontalStick = createStick(-stickDistance, 0);
-verticalStick = createStick(0, stickDistance-4);
+//horizontalStick = createStick(-stickDistance, 0);
+//verticalStick = createStick(0, stickDistance-4);
+let verticalStick = new THREE.Group;
+let horizontalStick = new THREE.Group;
+
+let stickRest = new THREE.Mesh;
+let stickRot = new THREE.Mesh;
+
+loader.load('models/stickRest.glb', function(gltf2){
+    stickRest=gltf2.scene;
+    stickRest.scale.set(2.35, 2.35, 2.35);
+    verticalStick.add(stickRest);
+    }, undefined, function(error) {
+    consolex.error(error);
+        });
+
+
+        loader.load('models/stickRot.glb', function(gltf2){
+            stickRot=gltf2.scene;
+            stickRot.scale.set(2.35, 2.35, 2.35);
+            }, undefined, function(error) {
+            consolex.error(error);
+                });
+        
+
+
+//panelGroup.add(horizontalStick);
+//panelGroup.add(verticalStick);
+
+scene.add(panelGroup);
+
+
+horizontalStick.add(stickRest);
 
 panelGroup.add(horizontalStick);
 panelGroup.add(verticalStick);
 
-scene.add(panelGroup);
+
 
 
 //---------------------------------------СОЗДАНИЕ--КНОПКИ---------------------------------------------
@@ -613,13 +697,13 @@ const checkDeviation = (landerPosition) => {
 
 //---------------------------------------ОБНОВЛЕНИЕ---ИНДИКАТОРОВ---------------------------------------------
 
-	horizontalStick.translateX(-1.8);
-	horizontalStick.translateY(-0.7);
-	horizontalStick.translateZ(0.3);
+	horizontalStick.translateX(1.5);
+	horizontalStick.translateY(-0.2);
+	horizontalStick.translateZ(-0.1);
 
-	verticalStick.translateX(0.7);
-	verticalStick.translateY(-0.7);
-	verticalStick.translateZ(0.3);
+	verticalStick.translateX(-1.5);
+	verticalStick.translateY(-0.2);
+	verticalStick.translateZ(-0.1);
 
 
 
@@ -630,27 +714,34 @@ const checkDeviation = (landerPosition) => {
 	panelGroup.position.copy(camera.position);
     panelGroup.rotation.y=-1.75;
     panelGroup.rotation.x=-0.4;
-	panelGroup.translateX(0);
+	panelGroup.translateX(0.015);
 	panelGroup.translateY(-3);
-	panelGroup.translateZ(0.09);
+	panelGroup.translateZ(0.24);
 
 	directionalLightCam.position.copy(verticalStick.position);
 	directionalLightCam.translateX(0);
 	directionalLightCam.translateY(0);
 	directionalLightCam.translateZ(2);
 	
-	
 	const timeElapsed = (Date.now() - startTime) / 350;
 
 	const newPosStick = lander.position.y - getReferenceAltitude(timeElapsed);
 
 	//Обновление вертикального индикатора
-    verticalIndicator.base.position.set(0, 0, 0);
-    verticalIndicator.stick.position.y = (newPosStick/100)+0.1;
-	verticalIndicator.base.rotation.set(-1.5, 0, 0);
-    verticalIndicator.base.translateZ(0.2);
-    verticalIndicator.base.translateX(0.7);
-    verticalIndicator.base.translateY(0.04);
+    vertBase.position.set(0, 0, 0);
+    vertStick.position.set(0, 0, 0);
+
+    vertStick.rotation.set(-0.575, 0.066, 0);
+    vertStick.translateZ(0.25);
+    vertStick.translateX(0.66);
+    vertStick.translateY(0.56);
+
+    //vertStick.position.y = (newPosStick/100)+0.1;
+    //vertStick.position.y = -2;
+	vertBase.rotation.set(-0.575, 0.066, 0);
+    vertBase.translateZ(0.25);
+    vertBase.translateX(0.66);
+    vertBase.translateY(0.56);
 
 	/////
 
@@ -664,12 +755,24 @@ const checkDeviation = (landerPosition) => {
 
 //---------------------------------------СОЗДАНИЕ--ФУНКЦИЙ--ДЛЯ--СТИКОВ---------------------------------------------
 
+
+let isFuelStick = false;
+//
+let isMoveStickRight = false;
+let isMoveStickLeft = false;
+let isRotStickForward = false;
+let isRotStickBack = false;
+
 // Переменные для хранения состояния вращения
 let isDraggingLeft = false;
 let isDraggingRight = false;
 const rotationSpeed = 0.005; // Скорость вращения
 
 const stickRadius = 2.5; // Ограничение радиуса перемещения
+
+let forFuel = 0;
+let forwardBack = 0;
+let leftRight = 0;
 
 function onMouseMove(event) {
     // Если один из стиков зажат, вращаем его
@@ -684,12 +787,24 @@ function onMouseMove(event) {
         const angleY = mouseX * 2;
         
         if (isDraggingLeft) {
-            verticalStick.rotation.x = (-angleX - 1) * 0.8;
-            verticalStick.rotation.z = (-angleY + 1.3) * 1.0;
+            //verticalStick.rotation.x = (-angleX - 1) * 0.8;
+            //verticalStick.rotation.z = (-angleY + 1.3) * 1.0;
+
+            
+            forwardBack = (-angleX - 1) * 0.8;
+            leftRight = (-angleY + 1.3) * 1.0;
+
+            //console.log(verticalStick.rotation.x);
+            //console.log(verticalStick.rotation.z);
+            
         }
 
         if (isDraggingRight) {
-            horizontalStick.rotation.x = -angleX - 1;
+            //horizontalStick.rotation.x = -angleX - 1;
+            forFuel = (-angleX - 1);
+
+            console.log("---")
+            //console.log(horizontalStick.rotation.x);
         }
     }
 
@@ -702,6 +817,8 @@ function onMouseDown(event) {
     const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
     
+    
+
     // Проектируем мышь на 3D-сцену
     const mouseVector = new THREE.Vector2(mouseX, mouseY);
     const raycaster = new THREE.Raycaster();
@@ -709,25 +826,53 @@ function onMouseDown(event) {
 
 
     
-    const intersects = raycaster.intersectObjects([verticalStick, horizontalStick]);
+    const intersects = raycaster.intersectObjects([verticalStick, horizontalStick], true);
     
     if (intersects.length > 0) {
         const intersectedStick = intersects[0].object;
+        console.log("Кликнули по:", intersectedStick); // Лог объекта
         
-        if (intersectedStick === verticalStick) {
+        if (intersectedStick === verticalStick || verticalStick.children.includes(intersectedStick)) {
             isDraggingLeft = true;
+
+            console.log("Вертикальный стик активен");
         } else if (intersectedStick === horizontalStick) {
             isDraggingRight = true;
-        } else if (intersectedStick === button) {
-            buttonPressed = true;
-        }
+            console.log("Горизонтальный стик активен");
+        } 
     }
 }
+
+/*if(forFuel > 1){
+    isFuelStick = true;
+
+    isThrusting = true;
+
+} else if(forwardBack < -0.1){
+    isRotStickForward = true;
+} else if(forwardBack > 0.65){
+    isRotStickBack = true;
+} else if (leftRight > 0.6){
+    isMoveStickLeft = true;
+} else if(leftRight < -0.05){
+    isMoveStickRight = true;
+}*/
+
+
+
 
 function onMouseUp(event) {
     // Сбрасываем состояние вращения
     isDraggingLeft = false;
     isDraggingRight = false;
+
+    isFuelStick = false;
+
+    isRotStickForward = false;
+    isRotStickBack = false;
+
+    isMoveStickRight = false;
+    isMoveStickLeft = false;
 }
 
 const moveSpeed = 0.05; // Скорость перемещения
@@ -859,7 +1004,7 @@ video.muted = true; // Без звука (или настройте по нео�
 const videoTexture = new THREE.VideoTexture(video);
 const videoMaterial = new THREE.MeshBasicMaterial({ map: texture });
 const videoPlane = new THREE.Mesh(new THREE.PlaneGeometry(5, 3), material);
-scene.add(plane);*/
+scene.add(videoPlane);*/
 
 
 //---------------------------------------ФИЛЬНАЛЬНАЯ--ФУНКЦИЯ---------------------------------------------
@@ -869,6 +1014,27 @@ function animate() {
 
 
     requestAnimationFrame(animate);
+
+    console.log(isDraggingLeft)
+
+    if(forFuel > 1){
+        isFuelStick = true;
+        
+        isThrusting = true;
+
+        horizontalStick.clear();
+        horizontalStick.add(stickRot);
+    
+    } else if(forwardBack < -0.1){
+        isRotStickForward = true;
+    } else if(forwardBack > 0.65){
+        isRotStickBack = true;
+    } else if (leftRight > 0.6){
+        isMoveStickLeft = true;
+    } else if(leftRight < -0.05){
+        isMoveStickRight = true;
+    }
+    
 
     particleGroup.position.copy(lander.position);
     particleGroup.rotation.copy(lander.rotation);
@@ -913,7 +1079,7 @@ function animate() {
 	
 		// Движение по оси Y при повороте
 		speedY = Math.sin(lander.rotation.y) * 0.05;
-		lander.position.z += verticalStick.rotation.z*0.02;
+		//lander.position.z += verticalStick.rotation.z*0.02;
 	
 		// Проверка на посадку
 		if (lander.position.y <= 5.6) {
@@ -929,7 +1095,7 @@ function animate() {
 
 	checkDeviation(lander.position);
    //Добавление вертикальной скорости при нажатой кнопке
-   if(horizontalStick.rotation.x >= 0.9 && isDraggingRight && fuelIndicator.bar.position.x > -0.65 && lander.position.y>=refVertPos){
+   if(isFuelStick && isDraggingRight && fuelIndicator.bar.position.x > -0.65 && lander.position.y>=refVertPos){
         curHorSpeed -= 0.01;
         fuelIndicator.bar.position.x -= 0.0005;
         //doBaseFire()
@@ -977,7 +1143,7 @@ function animate() {
         particleGroup.rotation.y = lander.rotation.y;
         particleGroup.rotation.z = lander.rotation.z;
 
-   }else if(horizontalStick.rotation.x >= 0.9 && isDraggingRight && fuelIndicator.bar.position.x > -0.65 && lander.position.y<refVertPos){
+   }else if(isFuelStick && isDraggingRight && fuelIndicator.bar.position.x > -0.65 && lander.position.y<refVertPos){
     velocity.y += thrustForce;
     fuelIndicator.bar.position.x -= 0.0005;
     //doBaseFire()
@@ -1224,14 +1390,14 @@ function animate() {
     }
 
    //console.log(fuelIndicator.bar.position.x);
-
+   // console.log(isThrusting);
     //Добавление вертикальной скорости на стрелочку вверх
-    if (isThrusting && lander.position.y>=refVertPos) {
+    /*if (isThrusting && lander.position.y>=refVertPos) {
         fuelIndicator.bar.position.x -= 0.005;
     }else if(isThrusting && lander.position.y<refVertPos){
         velocity.y += thrustForce;
         fuelIndicator.bar.position.x -= 0.005;
-    }
+    }*/
 
     
     lander.position.add(velocity);
@@ -1250,7 +1416,7 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-/*if (countdownTime > 0) {
+if (countdownTime > 0) {
     const minutes = String(Math.floor(countdownTime / 60)).padStart(2, '0');
     const seconds = String(Math.floor(countdownTime % 60)).padStart(2, '0');
     
@@ -1273,7 +1439,7 @@ function animate() {
             height: 0.1
         });
     }
-}*/
+}
 
 
 animate();
